@@ -1,0 +1,1007 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KutBody Elite — Onboarding</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+<style>
+/* ── TOKENS ── */
+:root {
+  --gold:       #C9A84C;
+  --gold-light: #F0D080;
+  --gold-dim:   #8B6914;
+  --gold-glow:  rgba(201,168,76,0.14);
+  --black:      #080808;
+  --black2:     #111111;
+  --black3:     #1A1A1A;
+  --white:      #F5F0E8;
+  --muted:      #585858;
+  --purple:     #7B4FBF;
+  --green:      #4CAF7A;
+}
+
+/* ── RESET ── */
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { height:100%; }
+body {
+  background: var(--black);
+  color: var(--white);
+  font-family: 'Montserrat', sans-serif;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* ── GRAIN ── */
+body::after {
+  content: '';
+  position: fixed; inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.032'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* ── ATMOSPHERE ── */
+#atmos {
+  position: fixed; inset: 0;
+  pointer-events: none; z-index: 0;
+}
+#atmos::before {
+  content: '';
+  position: absolute; top:-30%; left:-20%;
+  width:70%; height:70%;
+  background: radial-gradient(ellipse, rgba(201,168,76,.07) 0%, transparent 65%);
+}
+#atmos::after {
+  content: '';
+  position: absolute; bottom:-25%; right:-15%;
+  width:55%; height:55%;
+  background: radial-gradient(ellipse, rgba(123,79,191,.05) 0%, transparent 65%);
+}
+
+/* ── CORNERS ── */
+.corner {
+  position: fixed; width:44px; height:44px;
+  z-index: 10; opacity:.18;
+}
+.corner.tl { top:16px; left:16px; border-top:1px solid var(--gold); border-left:1px solid var(--gold); }
+.corner.tr { top:16px; right:16px; border-top:1px solid var(--gold); border-right:1px solid var(--gold); }
+.corner.bl { bottom:16px; left:16px; border-bottom:1px solid var(--gold); border-left:1px solid var(--gold); }
+.corner.br { bottom:16px; right:16px; border-bottom:1px solid var(--gold); border-right:1px solid var(--gold); }
+
+/* ── TOP BAR ── */
+#topBar {
+  position: fixed; top:0; left:0; right:0;
+  z-index: 100;
+  padding: 15px 26px;
+  display: none;
+  align-items: center;
+  gap: 14px;
+  background: linear-gradient(180deg, rgba(8,8,8,.96) 0%, transparent 100%);
+}
+.logo-sm {
+  font-size: 13px; font-weight:800;
+  letter-spacing: 2px; white-space: nowrap;
+}
+.logo-sm .k { color: var(--purple); }
+.logo-sm .b { color: var(--white); }
+.prog-track {
+  flex: 1; height: 1px;
+  background: rgba(201,168,76,.1);
+  position: relative;
+}
+.prog-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--gold-dim), var(--gold));
+  transition: width .6s cubic-bezier(.16,1,.3,1);
+  position: relative;
+}
+.prog-fill::after {
+  content: '';
+  position: absolute; right:-1px; top:-3px;
+  width:7px; height:7px; border-radius:50%;
+  background: var(--gold);
+  box-shadow: 0 0 10px var(--gold);
+}
+.step-lbl {
+  font-size: 9px; font-weight:700;
+  letter-spacing: 2.5px; color: var(--gold-dim);
+  white-space: nowrap;
+}
+
+/* ── RETURN BANNER ── */
+#returnBanner {
+  position: fixed; top:0; left:0; right:0;
+  z-index: 200;
+  background: linear-gradient(135deg, var(--black3), var(--black2));
+  border-bottom: 1px solid var(--gold-dim);
+  padding: 12px 22px;
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.rb-text { font-size:11px; font-weight:600; letter-spacing:.4px; }
+.rb-text span { color: var(--gold); }
+.rb-btns { display:flex; gap:8px; }
+.rb-btn {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 9px; font-weight:700;
+  letter-spacing: 2px; text-transform: uppercase;
+  border: 1px solid var(--gold-dim);
+  background: transparent; color: var(--gold);
+  padding: 6px 14px; cursor: pointer;
+  transition: all .2s;
+}
+.rb-btn:hover { background: var(--gold); color: var(--black); border-color: var(--gold); }
+.rb-btn.solid { background: var(--gold-dim); color: var(--white); }
+
+/* ── SCREEN SYSTEM ── */
+#app {
+  position: relative; z-index:1;
+  width:100vw; height:100vh;
+}
+.screen {
+  display: none;
+  position: absolute; inset: 0;
+  flex-direction: column;
+  align-items: center;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 70px 22px 52px;
+  animation: sIn .6s cubic-bezier(.16,1,.3,1) forwards;
+}
+.screen.active { display:flex; }
+@keyframes sIn {
+  from { opacity:0; transform:translateY(20px); }
+  to   { opacity:1; transform:translateY(0);    }
+}
+@keyframes sOut {
+  from { opacity:1; transform:translateY(0);    }
+  to   { opacity:0; transform:translateY(-18px);}
+}
+.screen.leaving { animation: sOut .3s cubic-bezier(.16,1,.3,1) forwards; }
+
+/* ── TYPE ── */
+.eyebrow {
+  font-size: 9px; font-weight:700;
+  letter-spacing: 4px; text-transform: uppercase;
+  color: var(--gold); text-align: center;
+  margin-bottom: 10px;
+}
+.display {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(34px,7vw,66px);
+  font-weight: 300; line-height: 1.06;
+  text-align: center;
+}
+.display em {
+  font-style: italic;
+  background: linear-gradient(135deg, var(--gold-light), var(--gold));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.subtitle {
+  font-size: 12px; font-weight:300;
+  color: rgba(245,240,232,.48);
+  text-align: center; max-width: 370px;
+  line-height: 1.85; letter-spacing:.4px;
+  margin-top: 12px;
+}
+.divider {
+  width: 80px; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  margin: 20px auto;
+}
+.divider.wide { width:120px; }
+.note {
+  font-size: 10px; font-weight:300;
+  color: var(--muted); text-align:center;
+  line-height: 1.7; max-width:360px;
+}
+
+/* ── BUTTONS ── */
+.btn {
+  display: inline-flex; align-items:center;
+  justify-content: center; gap:10px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 10px; font-weight:700;
+  letter-spacing: 3px; text-transform: uppercase;
+  padding: 15px 30px; cursor: pointer;
+  border: 1px solid var(--gold);
+  background: transparent; color: var(--gold);
+  position: relative; overflow: hidden;
+  transition: color .3s;
+}
+.btn::before {
+  content: '';
+  position: absolute; inset:0;
+  background: linear-gradient(135deg, var(--gold-dim), var(--gold));
+  opacity: 0; transition: opacity .3s;
+}
+.btn:hover::before { opacity:1; }
+.btn:hover { color: var(--black); }
+.btn > * { position: relative; z-index:1; }
+.btn .arr { transition: transform .3s; }
+.btn:hover .arr { transform: translateX(4px); }
+.btn[disabled] { opacity:.3; pointer-events:none; }
+.btn.full { width:100%; }
+.btn.ghost {
+  border-color: rgba(201,168,76,.18);
+  color: var(--muted); font-size:9px;
+  padding: 10px 20px;
+}
+.btn.ghost::before { background: rgba(201,168,76,.07); }
+.btn.ghost:hover { color: var(--white); }
+.btn-stack {
+  display: flex; flex-direction: column;
+  align-items: center; gap:10px;
+  width:100%; max-width:440px;
+  margin-top: 24px;
+}
+
+/* ── WELCOME STATS ── */
+.w-stats {
+  display: flex; gap:0;
+  margin-top: 30px;
+}
+.wstat { text-align:center; padding: 0 26px; }
+.wstat + .wstat { border-left: 1px solid rgba(201,168,76,.15); }
+.wstat-n {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 34px; font-weight:600;
+  color: var(--gold); display:block; line-height:1;
+}
+.wstat-l {
+  font-size: 8px; font-weight:600;
+  letter-spacing: 2.5px; color: var(--muted);
+  text-transform: uppercase; display:block; margin-top:5px;
+}
+
+/* ── AVATAR CARDS ── */
+.avatar-grid {
+  display: grid; grid-template-columns:1fr 1fr;
+  gap: 10px; width:100%; max-width:460px;
+  margin-top: 22px;
+}
+.acard {
+  border: 1px solid rgba(201,168,76,.13);
+  background: rgba(201,168,76,.02);
+  padding: 16px 14px; cursor:pointer;
+  transition: all .3s; position:relative; overflow:hidden;
+}
+.acard::before {
+  content:'';
+  position:absolute; inset:0;
+  background: linear-gradient(135deg,rgba(201,168,76,.07),transparent);
+  opacity:0; transition:opacity .3s;
+}
+.acard:hover::before,
+.acard.sel::before { opacity:1; }
+.acard.sel {
+  border-color: var(--gold);
+  box-shadow: 0 0 20px rgba(201,168,76,.1);
+}
+.acheck {
+  position:absolute; top:8px; right:8px;
+  width:16px; height:16px; border-radius:50%;
+  background: var(--gold);
+  display:flex; align-items:center; justify-content:center;
+  font-size:9px; font-weight:700; color: var(--black);
+  opacity:0; transition:opacity .2s;
+}
+.acard.sel .acheck { opacity:1; }
+.aicon { font-size:20px; margin-bottom:7px; display:block; }
+.aname { font-size:10px; font-weight:700; letter-spacing:1px; margin-bottom:3px; }
+.adesc { font-size:9px; font-weight:300; color: var(--muted); line-height:1.5; }
+
+/* ── FORM ── */
+.form {
+  display:flex; flex-direction:column;
+  gap:13px; width:100%; max-width:440px;
+  margin-top: 22px;
+}
+.field { display:flex; flex-direction:column; gap:5px; }
+.lbl {
+  font-size:8px; font-weight:700;
+  letter-spacing:3px; text-transform:uppercase;
+  color: var(--gold-dim);
+}
+.inp, .sel, .tarea {
+  background: rgba(201,168,76,.03);
+  border: 1px solid rgba(201,168,76,.17);
+  color: var(--white);
+  font-family: 'Montserrat', sans-serif;
+  font-size: 12px; font-weight:400;
+  padding: 13px 14px; outline:none; width:100%;
+  transition: border-color .3s, box-shadow .3s;
+}
+.inp:focus, .sel:focus, .tarea:focus {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 1px rgba(201,168,76,.08);
+}
+.inp::placeholder, .tarea::placeholder { color: rgba(245,240,232,.17); }
+.sel {
+  appearance:none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%238B6914' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 13px center;
+}
+.sel option { background: var(--black2); }
+.tarea { resize:vertical; min-height:76px; line-height:1.6; }
+.row2 { display:grid; grid-template-columns:1fr 1fr; gap:11px; }
+
+/* ── PHASE CARDS ── */
+.phases {
+  display:flex; flex-direction:column;
+  gap:10px; width:100%; max-width:460px;
+  margin-top: 20px;
+}
+.pcard {
+  display:flex; gap:14px;
+  padding: 14px 16px;
+  border: 1px solid rgba(201,168,76,.1);
+  background: rgba(201,168,76,.02);
+  position:relative;
+}
+.pcard::before {
+  content:''; position:absolute;
+  left:0; top:0; bottom:0; width:2px;
+  background: linear-gradient(180deg, var(--gold-dim), transparent);
+}
+.pnum {
+  font-family: 'Cormorant Garamond', serif;
+  font-size:30px; font-weight:300;
+  color: rgba(201,168,76,.3); line-height:1; min-width:24px;
+}
+.pname { font-size:10px; font-weight:700; letter-spacing:2px; text-transform:uppercase; }
+.pweeks { font-size:8px; font-weight:600; letter-spacing:2px; color:var(--gold); margin:2px 0 5px; }
+.pdesc { font-size:10px; font-weight:300; color:rgba(245,240,232,.38); line-height:1.6; }
+
+/* ── PLATE VISUAL ── */
+.plate-wrap {
+  display:flex; flex-direction:column;
+  align-items:center; gap:18px;
+  width:100%; max-width:460px; margin-top:18px;
+}
+.plate {
+  width:190px; height:190px; border-radius:50%;
+  background: conic-gradient(
+    #4CAF7A 0deg 180deg,
+    #C9A84C 180deg 270deg,
+    #7B4FBF 270deg 330deg,
+    #8B6914 330deg 360deg
+  );
+  display:flex; align-items:center; justify-content:center;
+  box-shadow: 0 0 40px rgba(0,0,0,.65), 0 0 0 1px rgba(201,168,76,.18);
+}
+.plate-inner {
+  width:66px; height:66px; border-radius:50%;
+  background: var(--black2);
+  border: 1px solid rgba(201,168,76,.2);
+  display:flex; align-items:center; justify-content:center;
+  font-family:'Cormorant Garamond',serif;
+  font-size:8px; font-weight:600; letter-spacing:2px;
+  color: var(--gold); text-transform:uppercase;
+  text-align:center; line-height:1.5;
+}
+.plate-legend {
+  display:grid; grid-template-columns:1fr 1fr;
+  gap:8px; width:100%;
+}
+.leg-item {
+  display:flex; align-items:center; gap:9px;
+  padding: 10px 11px;
+  border: 1px solid rgba(201,168,76,.08);
+}
+.leg-dot { width:9px; height:9px; border-radius:50%; flex-shrink:0; }
+.leg-name { font-size:10px; font-weight:700; margin-bottom:1px; }
+.leg-detail { font-size:9px; font-weight:300; color:var(--muted); }
+
+/* ── TRAVEL TABLE ── */
+.tbl {
+  width:100%; max-width:460px;
+  margin-top: 18px; border-collapse:collapse;
+}
+.tbl th {
+  font-size:8px; font-weight:700;
+  letter-spacing:2.5px; text-transform:uppercase;
+  color: var(--gold-dim); padding:8px 9px;
+  text-align:left;
+  border-bottom: 1px solid rgba(201,168,76,.14);
+}
+.tbl td {
+  font-size:10px; font-weight:400;
+  color: rgba(245,240,232,.72);
+  padding: 10px 9px;
+  border-bottom: 1px solid rgba(201,168,76,.05);
+  vertical-align:top; line-height:1.4;
+}
+.tbl tr:last-child td { border-bottom:none; }
+.tbl td:first-child { font-weight:600; color:var(--white); }
+.tag {
+  font-size:8px; font-weight:600; letter-spacing:1px;
+  color: var(--gold); background: rgba(201,168,76,.07);
+  padding:2px 6px; display:inline-block; margin-top:3px;
+}
+.tips {
+  width:100%; max-width:460px;
+  margin-top:12px;
+  display:flex; flex-direction:column; gap:8px;
+}
+.tip {
+  display:flex; align-items:flex-start; gap:10px;
+  padding:10px 12px;
+  background: rgba(201,168,76,.025);
+  border-left: 2px solid var(--gold-dim);
+}
+.tip-icon { font-size:12px; flex-shrink:0; margin-top:1px; }
+.tip-text { font-size:10px; font-weight:300; color:rgba(245,240,232,.55); line-height:1.6; }
+
+/* ── COMMITMENT LIST ── */
+.commits {
+  display:flex; flex-direction:column;
+  gap:9px; width:100%; max-width:460px;
+  margin-top: 20px;
+}
+.commit {
+  display:flex; align-items:flex-start; gap:12px;
+  padding:13px 14px;
+  border: 1px solid rgba(201,168,76,.09);
+}
+.c-icon {
+  width:30px; height:30px; flex-shrink:0;
+  border: 1px solid var(--gold-dim);
+  display:flex; align-items:center; justify-content:center;
+  font-size:13px; color:var(--gold);
+}
+.c-title { font-size:10px; font-weight:700; letter-spacing:1px; margin-bottom:2px; }
+.c-detail { font-size:10px; font-weight:300; color:var(--muted); line-height:1.5; }
+
+/* ── SUBMIT STATUS ── */
+.status-msg {
+  width:100%; max-width:440px;
+  padding: 10px 18px;
+  font-size:10px; font-weight:600; letter-spacing:.5px;
+  text-align:center; border:1px solid;
+  display:none; margin-top:10px;
+}
+.status-msg.ok  { color:var(--green); border-color:rgba(76,175,122,.3); background:rgba(76,175,122,.04); }
+.status-msg.err { color:#E57373;     border-color:rgba(229,115,115,.3); background:rgba(229,115,115,.04); }
+.status-msg.loading { color:var(--gold); border-color:var(--gold-dim); background:rgba(201,168,76,.03); }
+
+/* ── FINAL BADGE ── */
+.final-badge {
+  display:inline-flex; align-items:center; gap:8px;
+  border:1px solid var(--gold-dim);
+  padding:8px 20px; margin-top:14px;
+}
+.final-badge span {
+  font-size:9px; font-weight:700;
+  letter-spacing:3px; color:var(--gold); text-transform:uppercase;
+}
+
+/* ── SPINNER ── */
+.spin {
+  display:inline-block; width:13px; height:13px;
+  border:1px solid rgba(201,168,76,.3);
+  border-top-color:var(--gold);
+  border-radius:50%;
+  animation:spin .8s linear infinite;
+}
+@keyframes spin { to { transform:rotate(360deg); } }
+
+/* ── PULSE HINT ── */
+.pulse-hint {
+  position:fixed; bottom:22px; left:50%;
+  transform:translateX(-50%);
+  display:flex; flex-direction:column; align-items:center; gap:4px;
+  pointer-events:none;
+}
+.ph-text { font-size:7px; font-weight:700; letter-spacing:3px; color:var(--gold); opacity:.28; text-transform:uppercase; }
+.ph-line { width:1px; height:26px; background:linear-gradient(180deg,transparent,var(--gold)); opacity:.28; animation:ph 2s infinite; }
+@keyframes ph { 0%,100%{opacity:.28;} 50%{opacity:.55;} }
+
+/* ── RESPONSIVE ── */
+@media(max-height:680px) {
+  .w-stats { display:none; }
+  .display { font-size:30px; }
+}
+@media(max-width:380px) {
+  .avatar-grid { grid-template-columns:1fr; }
+  .row2         { grid-template-columns:1fr; }
+  .plate-legend { grid-template-columns:1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- ATMOSPHERE + CORNERS -->
+<div id="atmos"></div>
+<div class="corner tl"></div>
+<div class="corner tr"></div>
+<div class="corner bl"></div>
+<div class="corner br"></div>
+
+<!-- TOP PROGRESS BAR -->
+<div id="topBar">
+  <div class="logo-sm"><span class="k">Kut</span><span class="b">Body</span></div>
+  <div class="prog-track"><div class="prog-fill" id="progFill" style="width:0%"></div></div>
+  <div class="step-lbl" id="stepLbl">01 / 07</div>
+</div>
+
+<!-- RETURNING CLIENT BANNER -->
+<div id="returnBanner">
+  <div class="rb-text">Welcome back, <span id="rbName">Elite</span> — continue where you left off?</div>
+  <div class="rb-btns">
+    <button class="rb-btn" onclick="clearSession()">Start Over</button>
+    <button class="rb-btn solid" onclick="resumeSession()">Resume →</button>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+
+  <!-- ───── S0: WELCOME ───── -->
+  <div class="screen active" id="s0">
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:calc(100vh - 120px);text-align:center;padding:0 8px;">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:8px;margin-bottom:26px;">
+        <div style="font-size:26px;font-weight:800;letter-spacing:2px;">
+          <span style="color:var(--purple)">Kut</span><span>Body</span>
+        </div>
+        <div style="font-size:8px;font-weight:700;letter-spacing:4px;color:var(--gold);border:1px solid var(--gold-dim);padding:4px 12px;">ELITE PROGRAM</div>
+      </div>
+      <p class="eyebrow">Your Transformation Begins Here</p>
+      <h1 class="display">Built for the<br><em>Reinventor</em></h1>
+      <div class="divider wide"></div>
+      <p class="subtitle">A 12-week system engineered for professionals 35–50 who are done with programs that ignore real life.</p>
+      <div class="w-stats">
+        <div class="wstat"><span class="wstat-n">12</span><span class="wstat-l">Weeks</span></div>
+        <div class="wstat"><span class="wstat-n">45</span><span class="wstat-l">Min Max</span></div>
+        <div class="wstat"><span class="wstat-n">3</span><span class="wstat-l">Phases</span></div>
+        <div class="wstat"><span class="wstat-n">0</span><span class="wstat-l">Excuses</span></div>
+      </div>
+      <div class="btn-stack" style="margin-top:38px;">
+        <button class="btn" onclick="go(1)"><span>Begin Onboarding</span><span class="arr">→</span></button>
+      </div>
+    </div>
+    <div class="pulse-hint"><div class="ph-text">Scroll</div><div class="ph-line"></div></div>
+  </div>
+
+  <!-- ───── S1: AVATAR ───── -->
+  <div class="screen" id="s1">
+    <p class="eyebrow">Step 01 of 07 — Identity</p>
+    <h2 class="display">Find Your <em>Avatar</em></h2>
+    <p class="subtitle">Every KutBody journey starts here. Select the profile that best reflects your current chapter.</p>
+    <div class="avatar-grid">
+      <div class="acard" onclick="pickAvatar(this,'reinventor','The Reinventor')">
+        <div class="acheck">✓</div><span class="aicon">🔁</span>
+        <div class="aname">The Reinventor</div>
+        <div class="adesc">Mid-career, 35–50. Ready to break old patterns and reclaim your edge.</div>
+      </div>
+      <div class="acard" onclick="pickAvatar(this,'achiever','The Achiever')">
+        <div class="acheck">✓</div><span class="aicon">🚀</span>
+        <div class="aname">The Achiever</div>
+        <div class="adesc">Rising professional. Time-poor, goal-rich, building the foundation now.</div>
+      </div>
+      <div class="acard" onclick="pickAvatar(this,'visionary','The Visionary')">
+        <div class="acheck">✓</div><span class="aicon">⚡</span>
+        <div class="aname">The Visionary</div>
+        <div class="adesc">Entrepreneur. High-energy. Needs performance optimization first.</div>
+      </div>
+      <div class="acard" onclick="pickAvatar(this,'explorer','The Explorer')">
+        <div class="acheck">✓</div><span class="aicon">🧭</span>
+        <div class="aname">The Explorer</div>
+        <div class="adesc">50+. Longevity-focused. Committed to staying active and adapting.</div>
+      </div>
+    </div>
+    <div class="btn-stack">
+      <button class="btn full" id="avatarBtn" onclick="go(2)" disabled><span>Confirm Identity</span><span class="arr">→</span></button>
+      <button class="btn ghost" onclick="go(0)">← Back</button>
+    </div>
+  </div>
+
+  <!-- ───── S2: GOALS ───── -->
+  <div class="screen" id="s2">
+    <p class="eyebrow">Step 02 of 07 — Your Mission</p>
+    <h2 class="display">Set Your <em>Goals</em></h2>
+    <p class="subtitle">Clarity creates commitment. Define what success looks like for you over these 12 weeks.</p>
+    <div class="form">
+      <div class="field">
+        <label class="lbl">Your First Name</label>
+        <input class="inp" type="text" id="fName" placeholder="e.g. Marcus" oninput="syncName()">
+      </div>
+      <div class="field">
+        <label class="lbl">Primary Goal</label>
+        <input class="inp" type="text" id="fGoal" placeholder="e.g. Lose 20 lbs and rebuild my strength">
+      </div>
+      <div class="row2">
+        <div class="field">
+          <label class="lbl">Current Weight (lbs)</label>
+          <input class="inp" type="number" id="fCurW" placeholder="185">
+        </div>
+        <div class="field">
+          <label class="lbl">Target Weight (lbs)</label>
+          <input class="inp" type="number" id="fTgtW" placeholder="170">
+        </div>
+      </div>
+      <div class="field">
+        <label class="lbl">Biggest Obstacle</label>
+        <input class="inp" type="text" id="fObstacle" placeholder="e.g. Travel, stress, no consistent schedule">
+      </div>
+      <div class="field">
+        <label class="lbl">Why This, Why Now?</label>
+        <textarea class="tarea" id="fWhy" placeholder="What makes this moment different from previous attempts?"></textarea>
+      </div>
+    </div>
+    <div class="btn-stack">
+      <button class="btn full" onclick="go(3)"><span>Lock In Goals</span><span class="arr">→</span></button>
+      <button class="btn ghost" onclick="go(1)">← Back</button>
+    </div>
+  </div>
+
+  <!-- ───── S3: PROGRAM OVERVIEW ───── -->
+  <div class="screen" id="s3">
+    <p class="eyebrow">Step 03 of 07 — The System</p>
+    <h2 class="display">Your <em>12-Week</em><br>Architecture</h2>
+    <p class="subtitle">Three phases. Each builds on the last. This is not a workout plan — it is a complete transformation system.</p>
+    <div class="phases">
+      <div class="pcard">
+        <div class="pnum">01</div>
+        <div><div class="pname">Foundation</div><div class="pweeks">Weeks 1–4 · 3 Sessions / Week</div><div class="pdesc">Rebuild movement patterns and install the daily habits that carry you through the next 11 weeks. Consistency over intensity.</div></div>
+      </div>
+      <div class="pcard">
+        <div class="pnum">02</div>
+        <div><div class="pname">Build</div><div class="pweeks">Weeks 5–8 · 4 Sessions / Week</div><div class="pdesc">Progressive overload every session. Heavier loading, carb timing, travel protocol activated. Most physical transformation happens here.</div></div>
+      </div>
+      <div class="pcard">
+        <div class="pnum">03</div>
+        <div><div class="pname">Transform</div><div class="pweeks">Weeks 9–12 · 4 Sessions / Week</div><div class="pdesc">Peak intensity with strategic deload in Week 11. Personal records, final assessment, and your post-program maintenance system.</div></div>
+      </div>
+    </div>
+    <div class="btn-stack">
+      <button class="btn full" onclick="go(4)"><span>Understood — Continue</span><span class="arr">→</span></button>
+      <button class="btn ghost" onclick="go(2)">← Back</button>
+    </div>
+  </div>
+
+  <!-- ───── S4: NUTRITION ───── -->
+  <div class="screen" id="s4">
+    <p class="eyebrow">Step 04 of 07 — Fuel</p>
+    <h2 class="display">The KutBody <em>Plate</em></h2>
+    <p class="subtitle">You cannot out-train a bad diet. Every meal follows this simple visual framework — no calorie counting required.</p>
+    <div class="plate-wrap">
+      <div class="plate"><div class="plate-inner">KutBody<br>Plate</div></div>
+      <div class="plate-legend">
+        <div class="leg-item"><div class="leg-dot" style="background:#4CAF7A"></div><div><div class="leg-name">½ Plate — Vegetables</div><div class="leg-detail">Broccoli, spinach, peppers · Fiber &amp; volume</div></div></div>
+        <div class="leg-item"><div class="leg-dot" style="background:#C9A84C"></div><div><div class="leg-name">¼ Plate — Protein</div><div class="leg-detail">Chicken, fish, eggs · 0.8–1g / lb bodyweight</div></div></div>
+        <div class="leg-item"><div class="leg-dot" style="background:#7B4FBF"></div><div><div class="leg-name">¼ Plate — Carbs</div><div class="leg-detail">Rice, oats, sweet potato · Energy for training</div></div></div>
+        <div class="leg-item"><div class="leg-dot" style="background:#8B6914"></div><div><div class="leg-name">Thumb — Healthy Fats</div><div class="leg-detail">Avocado, olive oil, nuts · Hormone support</div></div></div>
+      </div>
+    </div>
+    <div class="btn-stack">
+      <button class="btn full" onclick="go(5)"><span>Got It — Next</span><span class="arr">→</span></button>
+      <button class="btn ghost" onclick="go(3)">← Back</button>
+    </div>
+  </div>
+
+  <!-- ───── S5: TRAVEL WORKOUT ───── -->
+  <div class="screen" id="s5">
+    <p class="eyebrow">Step 05 of 07 — Travel Protocol</p>
+    <h2 class="display">No Gym,<br><em>No Excuse</em></h2>
+    <p class="subtitle">The Reinventor travels. This is not an obstacle — it is a condition we plan for. 40 minutes, zero equipment.</p>
+    <table class="tbl">
+      <thead><tr><th>Exercise</th><th>Sets</th><th>Reps</th><th>Pattern</th></tr></thead>
+      <tbody>
+        <tr><td>Push-Up Variations<br><span class="tag">Wide / Narrow / Incline</span></td><td>4</td><td>Max</td><td>Push</td></tr>
+        <tr><td>Single-Leg RDL<br><span class="tag">Bodyweight, balance focus</span></td><td>3</td><td>10 / side</td><td>Hinge</td></tr>
+        <tr><td>Reverse Lunge<br><span class="tag">Add backpack for load</span></td><td>3</td><td>12 / side</td><td>Lunge</td></tr>
+        <tr><td>Inverted Row<br><span class="tag">Desk or table edge</span></td><td>3</td><td>Max</td><td>Pull</td></tr>
+        <tr><td>Single-Leg Glute Bridge<br><span class="tag">2s pause at top</span></td><td>3</td><td>15 / side</td><td>Hip Drive</td></tr>
+        <tr><td>Plank + Dead Bug Circuit<br><span class="tag">Core finisher</span></td><td>3</td><td>45s / 8 each</td><td>Core</td></tr>
+      </tbody>
+    </table>
+    <div class="tips">
+      <div class="tip"><span class="tip-icon">✈️</span><span class="tip-text">Pre-identify 2 high-protein restaurants near your destination before you arrive.</span></div>
+      <div class="tip"><span class="tip-icon">🎯</span><span class="tip-text">One missed workout is a rounding error. Three in a row is a pattern — address it immediately.</span></div>
+      <div class="tip"><span class="tip-icon">🥩</span><span class="tip-text">Airport nutrition: protein bar + nuts as backup. Order protein first at every meal.</span></div>
+    </div>
+    <div class="btn-stack">
+      <button class="btn full" onclick="go(6)"><span>Locked In — Continue</span><span class="arr">→</span></button>
+      <button class="btn ghost" onclick="go(4)">← Back</button>
+    </div>
+  </div>
+
+  <!-- ───── S6: COMMITMENTS + SUBMIT ───── -->
+  <div class="screen" id="s6">
+    <p class="eyebrow">Step 06 of 07 — The Agreement</p>
+    <h2 class="display">What This<br><em>Requires</em></h2>
+    <p class="subtitle">Elite results require elite habits. These four non-negotiables are the foundation of everything.</p>
+    <div class="commits">
+      <div class="commit"><div class="c-icon">⏱</div><div><div class="c-title">45 Minutes Max Per Session</div><div class="c-detail">Every workout is engineered around your real schedule. No marathon gym days.</div></div></div>
+      <div class="commit"><div class="c-icon">📋</div><div><div class="c-title">Sunday Check-Ins — Every Week</div><div class="c-detail">10 minutes, three numbers to your coach. The act of reporting drives consistency.</div></div></div>
+      <div class="commit"><div class="c-icon">🥩</div><div><div class="c-title">Hit Your Protein Target Daily</div><div class="c-detail">0.8–1g per lb bodyweight. This single lever does more than any supplement.</div></div></div>
+      <div class="commit"><div class="c-icon">🧠</div><div><div class="c-title">Mindset Protocols — Non-Negotiable</div><div class="c-detail">Weekly reflection, identity work, pattern-interruption. This is where lasting change is made.</div></div></div>
+    </div>
+    <div class="btn-stack">
+      <button class="btn full" id="submitBtn" onclick="handleSubmit()">
+        <span id="submitTxt">I Commit — Submit &amp; Finish</span>
+        <span class="arr" id="submitArr">→</span>
+      </button>
+      <button class="btn ghost" onclick="go(5)">← Back</button>
+    </div>
+    <div class="status-msg" id="statusMsg"></div>
+  </div>
+
+  <!-- ───── S7: COMPLETE ───── -->
+  <div class="screen" id="s7">
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:calc(100vh - 120px);text-align:center;padding:0 8px;">
+      <div style="width:46px;height:46px;border-radius:50%;border:1px solid rgba(201,168,76,.3);display:flex;align-items:center;justify-content:center;margin-bottom:14px;">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+          <path d="M4 11L9 16L18 7" stroke="#C9A84C" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" opacity=".7"/>
+        </svg>
+      </div>
+      <p class="eyebrow">Onboarding Complete</p>
+      <h2 class="display">Welcome,<br><em id="finalName">Reinventor</em></h2>
+      <div class="divider wide"></div>
+      <p class="subtitle">Your profile has been sent to your coach. Your Week 1 workout and nutrition plan are ready. The next 12 weeks will change everything.</p>
+      <div class="final-badge"><span id="finalBadge">The Reinventor · Elite Program</span></div>
+      <div class="btn-stack" style="max-width:360px;">
+        <button class="btn full" onclick="goToProgram()"><span>Access My Program</span><span class="arr">→</span></button>
+        <button class="btn ghost" onclick="go(6)">← Review</button>
+        <p class="note" style="margin-top:6px;">Check your email — your Week 1 plan has been sent.</p>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /#app -->
+
+<script>
+// ╔══════════════════════════════════════════════╗
+// ║  CONFIG — fill these in before deploying     ║
+// ╚══════════════════════════════════════════════╝
+const CFG = {
+  // EmailJS  →  emailjs.com  (free, 200 emails/month)
+  ejs_key:      'YOUR_EMAILJS_PUBLIC_KEY',
+  ejs_service:  'YOUR_SERVICE_ID',
+  ejs_template: 'YOUR_TEMPLATE_ID',
+
+  // Google Sheets  →  see setup guide at bottom of file
+  sheets_url:   'YOUR_APPS_SCRIPT_URL',
+
+  // Where clients go after finishing onboarding
+  program_url:  'https://kutbody.com/dashboard',
+};
+
+// ── state ──────────────────────────────────────
+let cur = 0;
+const TOTAL = 7;
+const S = { avatar:'', avatarLabel:'', name:'', goal:'', curW:'', tgtW:'', obstacle:'', why:'', ts:'' };
+
+// ── boot ───────────────────────────────────────
+window.addEventListener('load', () => {
+  if (CFG.ejs_key !== 'YOUR_EMAILJS_PUBLIC_KEY') emailjs.init(CFG.ejs_key);
+  try {
+    const saved = JSON.parse(localStorage.getItem('kb_client') || 'null');
+    if (saved?.name && saved?.avatar) {
+      Object.assign(S, saved);
+      document.getElementById('rbName').textContent = saved.name;
+      document.getElementById('returnBanner').style.display = 'flex';
+    }
+  } catch(e) {}
+});
+
+// ── navigation ─────────────────────────────────
+function go(n) {
+  if (n === cur) return;
+  const from = document.getElementById('s' + cur);
+  const to   = document.getElementById('s' + n);
+  if (!from || !to) return;
+  from.classList.add('leaving');
+  setTimeout(() => {
+    from.classList.remove('active','leaving');
+    to.classList.add('active');
+    to.scrollTop = 0;
+    cur = n;
+    refreshBar();
+  }, 270);
+}
+
+function refreshBar() {
+  const bar  = document.getElementById('topBar');
+  const fill = document.getElementById('progFill');
+  const lbl  = document.getElementById('stepLbl');
+  if (cur === 0) { bar.style.display = 'none'; return; }
+  bar.style.display = 'flex';
+  fill.style.width  = ((cur / TOTAL) * 100) + '%';
+  lbl.textContent   = p2(cur) + ' / ' + p2(TOTAL);
+}
+const p2 = n => String(n).padStart(2,'0');
+
+// ── avatar ─────────────────────────────────────
+function pickAvatar(el, type, label) {
+  document.querySelectorAll('.acard').forEach(c => c.classList.remove('sel'));
+  el.classList.add('sel');
+  S.avatar = type; S.avatarLabel = label;
+  document.getElementById('avatarBtn').disabled = false;
+  refreshFinal(); persist();
+}
+
+// ── name sync ──────────────────────────────────
+function syncName() {
+  S.name = document.getElementById('fName').value.trim();
+  refreshFinal(); persist();
+}
+
+function refreshFinal() {
+  const display = S.name || S.avatarLabel || 'Elite';
+  const badge   = (S.avatarLabel || 'KutBody Elite') + ' · Elite Program';
+  document.getElementById('finalName').textContent  = display;
+  document.getElementById('finalBadge').textContent = badge;
+}
+
+// ── localStorage ───────────────────────────────
+function persist() {
+  try { localStorage.setItem('kb_client', JSON.stringify(S)); } catch(e) {}
+}
+
+// ── returning client ───────────────────────────
+function clearSession() {
+  localStorage.removeItem('kb_client');
+  Object.keys(S).forEach(k => S[k] = '');
+  document.getElementById('returnBanner').style.display = 'none';
+}
+
+function resumeSession() {
+  document.getElementById('returnBanner').style.display = 'none';
+  const map = { fName:S.name, fGoal:S.goal, fCurW:S.curW, fTgtW:S.tgtW, fObstacle:S.obstacle, fWhy:S.why };
+  Object.entries(map).forEach(([id,val]) => { const el = document.getElementById(id); if (el && val) el.value = val; });
+  if (S.avatar) {
+    document.querySelectorAll('.acard').forEach(c => {
+      if (c.getAttribute('onclick')?.includes("'" + S.avatar + "'")) {
+        c.classList.add('sel');
+        document.getElementById('avatarBtn').disabled = false;
+      }
+    });
+  }
+  refreshFinal();
+  go(6);
+}
+
+// ── submit ─────────────────────────────────────
+async function handleSubmit() {
+  S.name     = document.getElementById('fName').value.trim()     || 'Client';
+  S.goal     = document.getElementById('fGoal').value.trim();
+  S.curW     = document.getElementById('fCurW').value.trim();
+  S.tgtW     = document.getElementById('fTgtW').value.trim();
+  S.obstacle = document.getElementById('fObstacle').value.trim();
+  S.why      = document.getElementById('fWhy').value.trim();
+  S.ts       = new Date().toLocaleString();
+  persist(); refreshFinal();
+
+  const btn = document.getElementById('submitBtn');
+  const txt = document.getElementById('submitTxt');
+  const arr = document.getElementById('submitArr');
+  const msg = document.getElementById('statusMsg');
+  btn.disabled = true;
+  txt.innerHTML = '<span class="spin"></span>&nbsp;Submitting...';
+  arr.style.display = 'none';
+  msg.style.display = 'none';
+
+  const payload = {
+    client_name:S.name, client_avatar:S.avatarLabel,
+    client_goal:S.goal, client_weight:S.curW,
+    client_target:S.tgtW, client_obstacle:S.obstacle,
+    client_why:S.why, client_date:S.ts,
+  };
+
+  let ok = false;
+
+  // 1 — EmailJS
+  try {
+    if (CFG.ejs_key !== 'YOUR_EMAILJS_PUBLIC_KEY') {
+      await emailjs.send(CFG.ejs_service, CFG.ejs_template, payload);
+    }
+    ok = true;
+  } catch(e) { console.warn('[EmailJS]', e); }
+
+  // 2 — Google Sheets
+  try {
+    if (CFG.sheets_url !== 'YOUR_APPS_SCRIPT_URL') {
+      await fetch(CFG.sheets_url, {
+        method:'POST', mode:'no-cors',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify(payload),
+      });
+    }
+    ok = true;
+  } catch(e) { console.warn('[Sheets]', e); }
+
+  // demo mode (keys not set) — always succeed
+  if (CFG.ejs_key === 'YOUR_EMAILJS_PUBLIC_KEY' && CFG.sheets_url === 'YOUR_APPS_SCRIPT_URL') ok = true;
+
+  btn.disabled = false;
+  txt.textContent = 'I Commit — Submit & Finish';
+  arr.style.display = '';
+
+  if (ok) {
+    msg.className = 'status-msg ok'; msg.style.display = 'block';
+    msg.textContent = '✓ Profile submitted — your coach will be in touch within 24 hours.';
+    setTimeout(() => go(7), 1300);
+  } else {
+    msg.className = 'status-msg err'; msg.style.display = 'block';
+    msg.textContent = '⚠ Submission error — check your connection and try again.';
+  }
+}
+
+function goToProgram() {
+  if (!CFG.program_url.includes('kutbody.com/dashboard')) {
+    window.location.href = CFG.program_url;
+  } else {
+    alert('Welcome, ' + (S.name || 'Reinventor') + '! Redirecting to your program...');
+  }
+}
+</script>
+
+<!--
+╔══════════════════════════════════════════════════════════════╗
+║                    SETUP GUIDE                               ║
+╠══════════════════════════════════════════════════════════════╣
+║                                                              ║
+║  STEP 1 — EMAILJS  (free · emailjs.com · 200 emails/month)  ║
+║  1. Create account at emailjs.com                            ║
+║  2. Email Services → Add New Service → connect Gmail         ║
+║  3. Email Templates → Create New Template                    ║
+║     Use these variables inside your template:                ║
+║       {{client_name}}  {{client_avatar}}  {{client_goal}}    ║
+║       {{client_weight}} {{client_target}} {{client_obstacle}}║
+║       {{client_why}}   {{client_date}}                       ║
+║  4. Account → API Keys → copy your Public Key                ║
+║  5. Paste into CFG at top of <script>:                       ║
+║       ejs_key      = 'user_xxxxxxxxxxxx'                     ║
+║       ejs_service  = 'service_xxxxxxx'                       ║
+║       ejs_template = 'template_xxxxxxx'                      ║
+║                                                              ║
+║  STEP 2 — GOOGLE SHEETS  (free · via Apps Script)            ║
+║  1. Create a new Google Sheet                                ║
+║  2. Add these headers in Row 1 (exact order):                ║
+║     Name | Avatar | Goal | Current Weight | Target Weight    ║
+║     | Obstacle | Why Now | Date                              ║
+║  3. Extensions → Apps Script → paste:                        ║
+║                                                              ║
+║     function doPost(e) {                                     ║
+║       var s = SpreadsheetApp                                 ║
+║                 .getActiveSpreadsheet().getActiveSheet();    ║
+║       var d = JSON.parse(e.postData.contents);               ║
+║       s.appendRow([                                          ║
+║         d.client_name,   d.client_avatar,                    ║
+║         d.client_goal,   d.client_weight,                    ║
+║         d.client_target, d.client_obstacle,                  ║
+║         d.client_why,    d.client_date                       ║
+║       ]);                                                    ║
+║       return ContentService.createTextOutput('OK');          ║
+║     }                                                        ║
+║                                                              ║
+║  4. Save → Deploy → New Deployment                           ║
+║     · Type: Web App                                          ║
+║     · Execute as: Me                                         ║
+║     · Who has access: Anyone                                 ║
+║  5. Copy the /exec URL → paste into CFG.sheets_url           ║
+║                                                              ║
+║  STEP 3 — DEPLOY TO VERCEL                                   ║
+║  1. Save this file as  index.html                            ║
+║  2. Push to a new GitHub repo                                ║
+║  3. vercel.com → Add New Project → Import repo → Deploy      ║
+║  4. Optional: Settings → Domains → add custom domain         ║
+║                                                              ║
+║  CUSTOMISATION                                               ║
+║  · Colors  →  CSS :root variables at top of <style>          ║
+║  · Copy    →  edit HTML text directly                        ║
+║  · program_url  →  where clients land after finishing        ║
+║                                                              ║
+╚══════════════════════════════════════════════════════════════╝
+-->
+</body>
+</html>
